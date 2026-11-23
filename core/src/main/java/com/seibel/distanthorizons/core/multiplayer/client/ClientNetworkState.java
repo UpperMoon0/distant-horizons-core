@@ -178,6 +178,13 @@ public class ClientNetworkState implements Closeable
 				}
 			});
 			
+			// Attach the completed split buffer on the network thread, before
+			// NetworkSession completes request futures. The compression executor
+			// may run much later; a cache-only buffer can expire before decoding.
+			this.networkSession.registerHandler(FullDataSourceResponseMessage.class, message ->
+			{
+				this.fullDataPayloadReceiver.attachBufferToResponse(message.payload);
+			});
 			this.networkSession.registerHandler(FullDataSplitMessage.class, this.fullDataPayloadReceiver::receiveChunk);
 			this.networkSession.registerHandler(FullDataSplitMessage.class, this.congestionControl::onPayloadReceived);
 		}
