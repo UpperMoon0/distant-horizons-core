@@ -2,6 +2,7 @@ package com.seibel.distanthorizons.core.multiplayer.fullData;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalNotification;
+import com.google.common.cache.RemovalCause;
 import com.seibel.distanthorizons.core.config.Config;
 import com.seibel.distanthorizons.core.logging.DhLogger;
 import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
@@ -28,7 +29,7 @@ public class FullDataPayloadReceiver implements AutoCloseable
 		.removalListener((RemovalNotification<Integer, CompositeByteBuf> notification) ->
 		{
 			CompositeByteBuf buffer = notification.getValue();
-			if (notification.getCause().wasEvicted() && buffer != null && buffer.refCnt() > 0)
+			if (notification.getCause() == RemovalCause.EXPIRED && buffer != null && buffer.refCnt() > 0)
 			{
 				buffer.release();
 			}
