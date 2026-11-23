@@ -142,7 +142,7 @@ public class DhClientLevel extends AbstractDhLevel implements IDhClientLevel
 		{
 			this.networkEventSource = new ScopedNetworkEventSource(this.networkState.getSession());
 			this.syncOnLoadRequestQueue = new SyncOnLoadRequestQueue(this, this.networkState);
-			this.registerNetworkHandlers();
+
 		}
 		else
 		{
@@ -162,6 +162,13 @@ public class DhClientLevel extends AbstractDhLevel implements IDhClientLevel
 		this.runRepoReliantSetup();
 		
 		this.clientside.startRenderer();
+		// Register only after the full-data repository and client module are ready.
+		// DH can deliver level data from the network thread as soon as a handler
+		// is registered; doing that earlier races the constructor and drops LODs.
+		if (this.networkEventSource != null)
+		{
+			this.registerNetworkHandlers();
+		}
 		LOGGER.info("Started DHLevel for " + this.levelWrapper + " with saves at " + this.saveStructure);
 	}
 	private void registerNetworkHandlers()
